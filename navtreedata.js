@@ -22,7 +22,7 @@ for the JavaScript code in this file
 */
 var NAVTREE =
 [
-  [ "Trackle esp-idf", "index.html", [
+  [ "Trackle library", "index.html", [
     [ "Trackle library", "md__r_e_a_d_m_e.html", [
       [ "Table of contents", "md__r_e_a_d_m_e.html#autotoc_md1", null ],
       [ "What is Trackle", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
