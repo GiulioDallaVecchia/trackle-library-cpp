@@ -84,7 +84,7 @@ $(document).ready(function(){initNavTree('md__r_e_a_d_m_e.html',''); initResizab
 
 <div class="PageDoc"><div class="header">
   <div class="headertitle">
-<div class="title"><a class="el" href="class_trackle.html">Trackle</a> library </div>  </div>
+<div class="title">Trackle library </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><div class="fragment"><div class="line">                     __     _         _ </div>
@@ -118,30 +118,30 @@ Table of contents</h1>
 </ul>
 <h1><a class="anchor" id="autotoc_md2"></a>
 What is Trackle</h1>
-<p><a class="el" href="class_trackle.html">Trackle</a> is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. <a href="https://www.trackle.io">Trackle website</a></p>
+<p>Trackle is an IoT platform that offers all the software and services needed to develop an IoT solution from Device to Cloud. <a href="https://www.trackle.io">Trackle website</a></p>
 <h1><a class="anchor" id="autotoc_md3"></a>
 Overview</h1>
-<p>This document provides instructions to use the <a class="el" href="class_trackle.html">Trackle</a> library and connect your device to <a class="el" href="class_trackle.html">Trackle</a> Cloud.</p>
+<p>This document provides instructions to use the Trackle library and connect your device to Trackle Cloud.</p>
 <h2><a class="anchor" id="autotoc_md4"></a>
 Supported hardware</h2>
-<p><a class="el" href="class_trackle.html">Trackle</a> library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.</p>
+<p>Trackle library is hardware agnostic. It depends on tinydtls that is compatible with contiki, esp-idf, posix, riot, windows and zephyr.</p>
 <h2><a class="anchor" id="autotoc_md5"></a>
 Download</h2>
-<p>You can download last <b><a class="el" href="class_trackle.html">Trackle</a> Library</b> from <a href="https://github.com/trackle-iot/trackle-library-cpp/releases/latest">here</a>.</p>
+<p>You can download last <b>Trackle Library</b> from <a href="https://github.com/trackle-iot/trackle-library-cpp/releases/latest">here</a>.</p>
 <h2><a class="anchor" id="autotoc_md6"></a>
 Usage and API</h2>
 <h3><a class="anchor" id="autotoc_md7"></a>
 Get a Device ID and a private key</h3>
 <ul>
-<li>Create an account on <a class="el" href="class_trackle.html">Trackle</a> Cloud (<a href="https://trackle.cloud/">https://trackle.cloud/</a>)</li>
+<li>Create an account on Trackle Cloud (<a href="https://trackle.cloud/">https://trackle.cloud/</a>)</li>
 <li>Open "My Devices" section from the drawer</li>
 <li>Click the button "Claim a device"</li>
 <li>Select the link "I don't have a device id", then Continue</li>
-<li>The Device Id will be shown on the screen and the private key file will be download with name &lt;device_id&gt;.der where &lt;device_id&gt; is Device ID taken from <a class="el" href="class_trackle.html">Trackle</a>.</li>
+<li>The Device Id will be shown on the screen and the private key file will be download with name &lt;device_id&gt;.der where &lt;device_id&gt; is Device ID taken from Trackle.</li>
 </ul>
 <h3><a class="anchor" id="autotoc_md8"></a>
 Getting started in C++</h3>
-<p>Here is a very simple C++ example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
+<p>Here is a very simple C++ example that create a client and connect it to Trackle cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle.h&quot;</div>
 <div class="line"> </div>
 <div class="line">#include &lt;sys/types.h&gt;</div>
@@ -285,7 +285,7 @@ Getting started in C++</h3>
 <div class="line">}</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md9"></a>
 Getting started in C</h3>
-<p>Here is a very simple C example that create a client and connect it to <a class="el" href="class_trackle.html">Trackle</a> cloud</p>
+<p>Here is a very simple C example that create a client and connect it to Trackle cloud</p>
 <div class="fragment"><div class="line">#include &quot;trackle_interface.h&quot;</div>
 <div class="line"> </div>
 <div class="line">#include &lt;sys/types.h&gt;</div>
@@ -432,7 +432,7 @@ Getting started in C</h3>
 <div class="line">}</div>
 </div><!-- fragment --><h3><a class="anchor" id="autotoc_md10"></a>
 Trackle client</h3>
-<p>The minimal usage flow for <a class="el" href="class_trackle.html">Trackle</a> client is as follows (C++ and C):</p>
+<p>The minimal usage flow for Trackle client is as follows (C++ and C):</p>
 <ul>
 <li><b>trackle.setDeviceId(device_id) - trackleSetDeviceId(trackle_s, device_id)</b>: set a deviceId to the client. Follow <a href="#get-a-device-id-and-a-private-key">Get a Device ID and a private key</a> instructions.</li>
 <li><b>trackle.setKeys(private_key) - trackleSetKeys(trackle_s, private_key)</b>: set a private key to the client. Follow <a href="#get-a-device-id-and-a-private-key">Get a Device ID and a private key</a> instructions.</li>
