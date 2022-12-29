@@ -65,7 +65,7 @@ var trackle_8cpp =
     [ "connection_retry", "trackle_8cpp.html#a393c457fef3fc122d92d67999b2ae121", null ],
     [ "connection_timeout", "trackle_8cpp.html#aa1b93a2bca49e1f34af849501d96340b", null ],
     [ "connectionPropType", "trackle_8cpp.html#a5e25691881193f499944882e6a275952", null ],
-    [ "connectionPropTypeList", "trackle_8cpp.html#a0942611e51478b7aca9667369016cef9", null ],
+    [ "connectionPropTypeList", "trackle_8cpp.html#ad7611018121622e41b5b5dc778911314", null ],
     [ "connectionStatus", "trackle_8cpp.html#a246e3c1292e3b79af3ca909db0e96156", null ],
     [ "connectionStatusCb", "trackle_8cpp.html#a2af2be170fe810f15a7370ce0dd8c4b8", null ],
     [ "connectionType", "trackle_8cpp.html#a9f4a903377ff13e530c0a8eeda83405c", null ],
