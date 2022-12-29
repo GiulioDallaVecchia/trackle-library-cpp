@@ -179,7 +179,7 @@ Getting started in C++</h3>
 <div class="line">}</div>
 <div class="line"> </div>
 <div class="line">/**</div>
-<div class="line"> * This creates a socket, sets the timeout and calls the trackleConnectionCompleted function</div>
+<div class="line"> * This creates a socket, sets the timeout and return socket creation result</div>
 <div class="line"> */</div>
 <div class="line">int connect_cb_udp(const char *address, int port)</div>
 <div class="line">{</div>
@@ -220,7 +220,6 @@ Getting started in C++</h3>
 <div class="line">    socket_timeout.tv_usec = 1000; // 1ms</div>
 <div class="line">    setsockopt(cloud_socket, SOL_SOCKET, SO_RCVTIMEO, (struct timeval *)&amp;socket_timeout, sizeof(struct timeval));</div>
 <div class="line"> </div>
-<div class="line">    trackleConnectionCompleted(trackle_s);</div>
 <div class="line">    return 1;</div>
 <div class="line">}</div>
 <div class="line"> </div>

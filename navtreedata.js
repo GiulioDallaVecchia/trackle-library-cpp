@@ -39,6 +39,7 @@ var NAVTREE =
         ] ]
       ] ]
     ] ],
+    [ "Deprecated List", "deprecated.html", null ],
     [ "Data Structures", "annotated.html", [
       [ "Data Structures", "annotated.html", "annotated_dup" ],
       [ "Data Structure Index", "classes.html", null ],
@@ -64,7 +65,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"trackle__interface_8cpp.html#a283922c6f3b6ca77838855cbbeeab4f5"
+"trackle__interface_8cpp.html#a0d83ce906352e317fe169cbbe6d7f595"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
