@@ -30,12 +30,13 @@ var NAVTREE =
       [ "What is Trackle", "md__r_e_a_d_m_e.html#autotoc_md2", null ],
       [ "Overview", "md__r_e_a_d_m_e.html#autotoc_md3", [
         [ "Supported hardware", "md__r_e_a_d_m_e.html#autotoc_md4", null ],
-        [ "Download", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
-        [ "Usage and API", "md__r_e_a_d_m_e.html#autotoc_md6", [
-          [ "Get a Device ID and a private key", "md__r_e_a_d_m_e.html#autotoc_md7", null ],
-          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
-          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
-          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md10", null ]
+        [ "License", "md__r_e_a_d_m_e.html#autotoc_md5", null ],
+        [ "Download", "md__r_e_a_d_m_e.html#autotoc_md6", null ],
+        [ "Usage and API", "md__r_e_a_d_m_e.html#autotoc_md7", [
+          [ "Get a Device ID and a private key", "md__r_e_a_d_m_e.html#autotoc_md8", null ],
+          [ "Getting started in C++", "md__r_e_a_d_m_e.html#autotoc_md9", null ],
+          [ "Getting started in C", "md__r_e_a_d_m_e.html#autotoc_md10", null ],
+          [ "Trackle client", "md__r_e_a_d_m_e.html#autotoc_md11", null ]
         ] ]
       ] ]
     ] ],
@@ -65,7 +66,7 @@ var NAVTREE =
 var NAVTREEINDEX =
 [
 "annotated.html",
-"trackle__interface_8cpp.html#a0d83ce906352e317fe169cbbe6d7f595"
+"trackle__interface_8cpp.html#a0cc175482389c8cec36ff1989736b013"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';
