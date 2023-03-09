@@ -182,6 +182,17 @@ namespace trackle
 			};
 
 		protected:
+
+      enum StateEnum
+      {
+        CHANNEL_INIT,
+        CHANNEL_ESTABLISHED,
+        SEND_HELLO,
+        WAIT_HELLO_RESPONSE
+      };
+
+      enum StateEnum status;
+
 			/**
 			 * Manages Ping functionality.
 			 */

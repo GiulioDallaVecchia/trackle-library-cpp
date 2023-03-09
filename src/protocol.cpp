@@ -275,77 +275,157 @@ namespace trackle
 
         /**
          * Establish a secure connection and send and process the hello message.
+         * Return:
+         * NO_ERROR in case handshake is not completed
+         * SESSION_CONNECTED in case handshake complete
+         * SESSION_RESUMED in case we reuse an old connection
+         * negative number in case of error
          */
         int Protocol::begin()
         {
-            LOG_CATEGORY("comm.protocol.handshake");
-            LOG(INFO, "Establish secure connection");
-            chunkedTransfer.reset();
-            pinger.reset();
-            timesync_.reset();
+            static system_tick_t t;
 
-            // FIXME: Pending completion handlers should be cancelled at the end of a previous session
-            ack_handlers.clear();
-            last_ack_handlers_update = callbacks.millis();
+            switch(this->status) {
 
-            uint32_t channel_flags = 0;
-            ProtocolError error = channel.establish(channel_flags, application_state_checksum());
-            bool session_resumed = (error == SESSION_RESUMED);
-            if (error && !session_resumed)
-            {
-                LOG(ERROR, "handshake failed with code %d", error);
-                return error;
-            }
+              case CHANNEL_INIT: {
 
-            if (session_resumed)
-            {
-                // for now, unconditionally move the session on resumption
-                channel.command(MessageChannel::MOVE_SESSION, nullptr);
-                if (channel_flags & SKIP_SESSION_RESUME_HELLO)
-                {
-                    flags |= SKIP_SESSION_RESUME_HELLO;
+                LOG_CATEGORY("comm.protocol.handshake");
+                LOG(INFO, "Establish secure connection");
+                chunkedTransfer.reset();
+                pinger.reset();
+                timesync_.reset();
+
+                // FIXME: Pending completion handlers should be cancelled at the end of a previous session
+                ack_handlers.clear();
+                last_ack_handlers_update = callbacks.millis();
+
+                /*
+                 * Reset channel state machine
+                 */
+                channel.init_status();
+
+                LOG(INFO, "Socket connection completed, starting handshake");
+
+                this->status = CHANNEL_ESTABLISHED;
+
+                break;
+              }
+
+              case CHANNEL_ESTABLISHED: {
+
+                uint32_t channel_flags = 0;
+
+                ProtocolError error = channel.establish(channel_flags, application_state_checksum());
+
+                /*
+                 * NO_ERROR in case handshake is not completed
+                 * SESSION_CONNECTED in case handshake complete
+                 * SESSION_RESUMED in case we reuse an old connection
+                 * negative number in case of error
+                 */
+
+                if(error == SESSION_CONNECTED) {
+
+                  this->status = SEND_HELLO;
+
+                } else if(error == SESSION_RESUMED) {
+
+                  // for now, unconditionally move the session on resumption
+                  channel.command(MessageChannel::MOVE_SESSION, nullptr);
+                  if (channel_flags & SKIP_SESSION_RESUME_HELLO)
+                  {
+                      flags |= SKIP_SESSION_RESUME_HELLO;
+                  }
+
+                  if (channel.is_unreliable() && (flags & SKIP_SESSION_RESUME_HELLO))
+                  {
+                      LOG(INFO, "resumed session - not sending HELLO message");
+                      const auto r = ping(true);
+                      if (r != NO_ERROR)
+                      {
+                          error = r;
+                      }
+                      // Note: Make sure SESSION_RESUMED gets returned to the calling code
+                      return error;
+                  }
+
+                  this->status = SEND_HELLO;
+
+                } else if(error != 0) {
+
+                  LOG(ERROR, "handshake failed with code %d", error);
+                  this->status = CHANNEL_INIT;
+                  return error;
+
+                } else {
+
+                  /*
+                   * We need to run again...
+                   */
+
                 }
-            }
 
-            // hello not needed because it's already been sent and the server maintains device state
-            if (session_resumed && channel.is_unreliable() && (flags & SKIP_SESSION_RESUME_HELLO))
-            {
-                LOG(INFO, "resumed session - not sending HELLO message");
-                const auto r = ping(true);
-                if (r != NO_ERROR)
-                {
-                    error = r;
-                }
-                // Note: Make sure SESSION_RESUMED gets returned to the calling code
-                return error;
-            }
+                break;
+              }
 
-            // todo - this will return code 0 even when the session was resumed,
-            // causing all the application events to be sent.
+              case SEND_HELLO: {
 
-            LOG(INFO, "Sending HELLO message");
-            error = hello(descriptor.was_ota_upgrade_successful());
-            if (error)
-            {
-                LOG(ERROR, "Could not send HELLO message: %d", error);
-                return error;
-            }
+                ProtocolError error;
 
-            if (flags & REQUIRE_HELLO_RESPONSE)
-            {
-                LOG(INFO, "Receiving HELLO response");
-                error = hello_response();
+                LOG(INFO, "Sending HELLO message");
+                error = hello(descriptor.was_ota_upgrade_successful());
                 if (error)
+                {
+                    LOG(ERROR, "Could not send HELLO message: %d", error);
+                    this->status = CHANNEL_INIT;
                     return error;
-            }
-            LOG(INFO, "Handshake completed");
-            channel.notify_established();
+                }
 
-            // Send system Describe
-            error = post_description(DescriptionType::DESCRIBE_DEFAULT);
-            if (error)
-            {
-                return error;
+                if (flags & REQUIRE_HELLO_RESPONSE)
+                {
+                  LOG(INFO, "Receiving HELLO response");
+                  t = callbacks.millis();
+                  this->status = WAIT_HELLO_RESPONSE;
+                }
+                else
+                {
+                  LOG(INFO, "Handshake completed");
+                  channel.notify_established();
+
+                  /* Send system Describe */
+                  error = post_description(DescriptionType::DESCRIBE_DEFAULT);
+                  if (error)
+                  {
+                    this->status = CHANNEL_INIT;
+                    return error;
+                  }
+
+                  this->status = CHANNEL_INIT;
+
+                  // TODO: This will cause all the application events to be sent even if the session was resumed
+                  return SESSION_CONNECTED;
+                }
+
+                break;
+              }
+
+              case WAIT_HELLO_RESPONSE: {
+
+                ProtocolError error;
+
+                if((callbacks.millis() - t) < 4000) {
+                  error = hello_response();
+                  if (error == NO_ERROR) {
+                    this->status = CHANNEL_INIT;
+                    return SESSION_CONNECTED;
+                  }
+                } else {
+                  this->status = CHANNEL_INIT;
+                  return MESSAGE_TIMEOUT;
+                }
+
+                break;
+              }
             }
 
             // TODO: This will cause all the application events to be sent even if the session was resumed
@@ -382,7 +462,7 @@ namespace trackle
 
         ProtocolError Protocol::hello_response()
         {
-            ProtocolError error = event_loop(CoAPMessageType::HELLO, 4000); // read the hello message from the server
+            ProtocolError error = event_loop(CoAPMessageType::HELLO, 0); // read the hello message from the server
             if (error)
             {
                 LOG(ERROR, "Handshake: could not receive HELLO response %d", error);

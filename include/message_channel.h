@@ -251,6 +251,11 @@ namespace trackle
 			 * Notify the upper layer that all client messages have been processed.
 			 */
 			virtual void notify_client_messages_processed() = 0;
+
+      /**
+       *
+       */
+      virtual void init_status() = 0;
 		};
 
 		class AbstractMessageChannel : public MessageChannel
