@@ -1516,7 +1516,6 @@ int completeCloudConnection()
     if (result == trackle::protocol::SESSION_RESUMED)
     {
         LOG(TRACE, "Session resumed");
-        session_resumed = true;
 
         LOG(INFO, "Cloud connected from existing session.");
 
