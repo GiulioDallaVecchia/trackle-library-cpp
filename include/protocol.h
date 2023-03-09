@@ -188,6 +188,7 @@ namespace trackle
         CHANNEL_INIT,
         CHANNEL_ESTABLISHED,
         SEND_HELLO,
+        ACK_WAITING,
         WAIT_HELLO_RESPONSE
       };
 
@@ -222,7 +223,12 @@ namespace trackle
 			 * Send the hello message over the channel.
 			 * @param was_ota_upgrade_successful {@code true} if the previous OTA update was successful.
 			 */
-			ProtocolError hello(bool was_ota_upgrade_successful);
+			ProtocolError hello(bool was_ota_upgrade_successful, message_id_t *id);
+
+      /**
+       * Wait an ACK from server
+       */
+      ProtocolError wait_ack(message_id_t id);
 
 			/**
 			 * Send a hello response
@@ -241,12 +247,12 @@ namespace trackle
 				size_t len = 0;
 				if (!forceCoAP)
 				{
-					DEBUG("Sending dumb ping");
+					TRACKLE_DEBUG("Sending dumb ping");
 					len = Messages::keep_alive(message.buf());
 				}
 				else
 				{
-					DEBUG("Sending application ping");
+					TRACKLE_DEBUG("Sending application ping");
 					len = Messages::ping(message.buf(), 0);
 				}
 				last_message_millis = callbacks.millis();

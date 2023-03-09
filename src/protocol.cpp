@@ -284,6 +284,7 @@ namespace trackle
         int Protocol::begin()
         {
             static system_tick_t t;
+            static message_id_t id;
 
             switch(this->status) {
 
@@ -373,37 +374,60 @@ namespace trackle
                 ProtocolError error;
 
                 LOG(INFO, "Sending HELLO message");
-                error = hello(descriptor.was_ota_upgrade_successful());
-                if (error)
-                {
-                    LOG(ERROR, "Could not send HELLO message: %d", error);
-                    this->status = CHANNEL_INIT;
-                    return error;
-                }
+                error = hello(descriptor.was_ota_upgrade_successful(), &id);
 
-                if (flags & REQUIRE_HELLO_RESPONSE)
+                /*
+                 * A questo punto devo aspettare un ACK dal server
+                 */
+                if(WAIT_FOR_ACK == error)
                 {
-                  LOG(INFO, "Receiving HELLO response");
-                  t = callbacks.millis();
-                  this->status = WAIT_HELLO_RESPONSE;
+                  this->status = ACK_WAITING;
                 }
                 else
                 {
-                  LOG(INFO, "Handshake completed");
-                  channel.notify_established();
-
-                  /* Send system Describe */
-                  error = post_description(DescriptionType::DESCRIBE_DEFAULT);
-                  if (error)
-                  {
-                    this->status = CHANNEL_INIT;
-                    return error;
-                  }
-
+                  /*
+                   * C'è stato un errore
+                   */
+                  LOG(ERROR, "Could not send HELLO message: %d", error);
                   this->status = CHANNEL_INIT;
+                  return error;
+                }
 
-                  // TODO: This will cause all the application events to be sent even if the session was resumed
-                  return SESSION_CONNECTED;
+                break;
+              }
+
+              case ACK_WAITING: {
+
+                ProtocolError error;
+
+                error = wait_ack(id);
+
+                if(ACK_RECEIVED == error)
+                {
+                  if (flags & REQUIRE_HELLO_RESPONSE)
+                  {
+                    LOG(INFO, "Receiving HELLO response");
+                    t = callbacks.millis();
+                    this->status = WAIT_HELLO_RESPONSE;
+                  }
+                  else
+                  {
+                    LOG(INFO, "Handshake completed");
+                    channel.notify_established();
+
+                    /* Send system Describe */
+                    error = post_description(DescriptionType::DESCRIBE_DEFAULT);
+                    if (error)
+                    {
+                      this->status = CHANNEL_INIT;
+                      return error;
+                    }
+
+                    this->status = CHANNEL_INIT;
+
+                    // TODO: This will cause all the application events to be sent even if the session was resumed
+                    return SESSION_CONNECTED;
+                  }
                 }
 
                 break;
@@ -446,7 +470,7 @@ namespace trackle
          * @param was_ota_upgrade_successful {@code true} if the previous OTA update was successful.
          */
         ProtocolError
-        Protocol::hello(bool was_ota_upgrade_successful)
+        Protocol::hello(bool was_ota_upgrade_successful, message_id_t *id)
         {
             Message message;
             channel.create(message);
@@ -457,6 +481,18 @@ namespace trackle
             message.set_confirm_received(true);
             last_message_millis = callbacks.millis();
             ProtocolError res = channel.send(message);
+            *id = message.get_id();
+            return res;
+        }
+
+        /**
+         * Send the hello message over the channel.
+         * @param was_ota_upgrade_successful {@code true} if the previous OTA update was successful.
+         */
+        ProtocolError
+        Protocol::wait_ack(message_id_t id)
+        {
+            ProtocolError res = channel.wait_ack(id);
             return res;
         }
 

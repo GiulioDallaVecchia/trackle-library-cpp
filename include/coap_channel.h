@@ -87,6 +87,11 @@ namespace trackle
 				}
 				return base::send(msg);
 			}
+
+//      ProtocolError wait_ack(message_id_t id) override
+//      {
+//        return base::wait_ack(id);
+//      }
 		};
 
 		/**
@@ -505,6 +510,11 @@ namespace trackle
 				return channel::send(msg);
 			}
 
+//      ProtocolError base_wait_ack(message_id_t id)
+//      {
+//        return channel::wait_ack(id);
+//      }
+
 			ProtocolError base_receive(Message &msg)
 			{
 				return channel::receive(msg);
@@ -532,6 +542,11 @@ namespace trackle
 				{
 					return channel->base_send(msg);
 				}
+
+//				ProtocolError wait_ack(message_id_t id) override
+//        {
+//          return channel->base_wait_ack(id);
+//        }
 
 				ProtocolError command(Command cmd, void *arg) override
 				{
@@ -601,6 +616,16 @@ namespace trackle
 				return error;
 			}
 
+      /**
+       * Wait an ACK from server
+       * @return
+       */
+      ProtocolError wait_ack(message_id_t id) override
+      {
+        Message msg;
+        return wait_ack_from_server(msg, id);
+      }
+
 			/**
 			 * Receives a message from the channel and passes it to the message store for processing before
 			 * passing on to the application.
@@ -668,7 +693,7 @@ namespace trackle
 			ProtocolError send_synchronous(Message &msg)
 			{
 				message_id_t id = msg.get_id();
-				DEBUG("sending message id=%x synchronously", id);
+				TRACKLE_DEBUG("sending message id=%x synchronously", id);
 				CoAPType::Enum coapType = CoAP::type(msg.buf());
 				const bool had_client_messages = client.has_messages();
 				ProtocolError error = client.send(msg, millis());
@@ -689,23 +714,14 @@ namespace trackle
 					if (coapmsg)
 						coapmsg->set_delivered_handler(&flag_delivered);
 					else
-						ERROR("no coapmessage for msg id=%x", id);
-					while (client.from_id(id) != nullptr && !error)
-					{
-						msg.clear();
-						msg.set_length(0);
-						error = delegateChannel.receive(msg);
+					  TRACKLE_ERROR("no coapmessage for msg id=%x", id);
 
-						if (!error && msg.decode_id() && is_ack_or_reset(msg.buf(), msg.length()))
-						{
-							// handle acknowledgements, waiting for the one that
-							// acknowledges the original confirmation.
-							ProtocolError receive_error = client.receive(msg, delegateChannel, millis());
-							if (!error)
-								error = receive_error;
-						}
-						// drop CON messages on the floor since we cannot handle them now
-						client.process(millis(), delegateChannel);
+					if (client.from_id(id) != nullptr && !error)
+					{
+					  /*
+					   * Wait for ACK
+					   */
+					  return WAIT_FOR_ACK;
 					}
 				}
 				client.clear_message(id);
@@ -716,6 +732,46 @@ namespace trackle
 				// todo - if msg contains a delivery callback then call that with the outcome of this
 				return error;
 			}
+
+      ProtocolError wait_ack_from_server(Message &msg, message_id_t id)
+      {
+        ProtocolError error;
+        const bool had_client_messages = client.has_messages();
+
+        msg.clear();
+        msg.set_length(0);
+        error = delegateChannel.receive(msg);
+
+        if (!error && msg.decode_id() && is_ack_or_reset(msg.buf(), msg.length()))
+        {
+          // handle acknowledgements, waiting for the one that
+          // acknowledges the original confirmation.
+          ProtocolError receive_error = client.receive(msg, delegateChannel, millis());
+          if (!error)
+            error = receive_error;
+
+          // drop CON messages on the floor since we cannot handle them now
+          client.process(millis(), delegateChannel);
+
+          if(client.from_id(id) == nullptr && !error)
+          {
+            client.clear_message(id);
+            if (had_client_messages && !client.has_messages())
+            {
+              channel::notify_client_messages_processed();
+            }
+
+            /*
+             * ACK received
+             */
+
+            return ACK_RECEIVED;
+          }
+        }
+
+        // todo - if msg contains a delivery callback then call that with the outcome of this
+        return error;
+      }
 		};
 
 	}

@@ -230,6 +230,12 @@ namespace trackle
 			 */
 			virtual ProtocolError establish(uint32_t &flags, uint32_t app_state_crc) = 0;
 
+      /**
+       * Send the given message to the endpoint
+       * @return an error value !=0 on error.
+       */
+      virtual ProtocolError wait_ack(message_id_t id) = 0;
+
 			/**
 			 * Retrieves a new message object containing the message buffer.
 			 */
