@@ -14,6 +14,8 @@
 
 // TRACKLE.VARIABLE ------------------------------------------------------------
 
+static Trackle TrackleIstance;
+
 // set status of cloud
 void trackleSetEnabled(Trackle *v, bool status)
 {
@@ -302,7 +304,7 @@ void trackleInit(Trackle *v)
 
 Trackle *newTrackle(void)
 {
-    return new Trackle();
+  return &TrackleIstance;
 }
 
 void deleteTrackle(Trackle *v)
